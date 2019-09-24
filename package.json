@@ -1,0 +1,31 @@
+{
+  "name": "avf",
+  "version": "0.1.0",
+  "description": "A node.js wrapper for common AVFoundation operations.",
+  "main": "index.js",
+  "scripts": {
+    "build": "swift build --configuration=release --static-swift-stdlib -Xswiftc '-target' -Xswiftc 'x86_64-apple-macosx10.12' && mv .build/release/avf .",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "avf",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cakuki/node-avf.git"
+  },
+  "keywords": [
+    "AVFoundation",
+    "macos",
+    "video",
+    "audio",
+    "media"
+  ],
+  "author": "Can Kutlu Kinay <me@ckk.im>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cakuki/node-avf/issues"
+  },
+  "homepage": "https://github.com/cakuki/node-avf#readme"
+}
