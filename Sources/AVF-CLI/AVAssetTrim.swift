@@ -28,6 +28,28 @@ extension FileManager {
 }
 
 extension AVAsset {
+    /// This function will generate image from a video at provided seconds.
+    /// - Parameters:
+    ///   - seconds: Seconds where image should be generated in Integer formate.
+    ///   - onSuccess: This callback will be called when image is generated successfully.
+    /// - Returns: Nothing
+    func captureVideoSnapshot(_ seconds: Int64, onSuccess: @escaping ((_ image: CGImage)->Void)) {
+        let imageGenerator = AVAssetImageGenerator(asset: self)
+        let time = NSValue(time: CMTimeMake(value: seconds, timescale: 60))
+        imageGenerator.appliesPreferredTrackTransform = true
+        DispatchQueue.global(qos: .background).async {
+            imageGenerator.generateCGImagesAsynchronously(forTimes: [time]) { _, image, _, _, error in
+                if let err = error {
+                    print("Error in generating image: ", err.localizedDescription)
+                    return
+                }
+                if let img = image {
+                    onSuccess(img)
+                }
+            }
+        }
+    }
+
     func assetByTrimming(timeOffStart: Double) throws -> AVAsset {
         return try assetByTrimming(timeStart: 0, timeEnd: timeOffStart)
     }
