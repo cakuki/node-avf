@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "swift build --configuration=release --static-swift-stdlib -Xswiftc '-target' -Xswiftc 'x86_64-apple-macosx10.12' && mv .build/release/avf .",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "jest"
   },
   "files": [
     "avf",
@@ -28,5 +29,10 @@
     "url": "https://github.com/cakuki/node-avf/issues"
   },
   "homepage": "https://github.com/cakuki/node-avf#readme",
-  "dependencies": {}
+  "devDependencies": {
+    "jest": "^27.4.7"
+  },
+  "dependencies": {
+    "electron-util": "^0.17.2"
+  }
 }
