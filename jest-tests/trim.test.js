@@ -1,72 +1,50 @@
-const avf = require('..')
-const path = require('path')
-const crypto = require('crypto');
-const fs = require('fs');
-const { expect } = require('@jest/globals');
+const avf = require("..");
+const path = require("path");
+const fs = require("fs");
+const { expect } = require("@jest/globals");
 
-// The verbose filenames are important because we may add support for different 
-// codecs, containers, framerates, etc. in the future. 
-const avfTrimFirstSecond = async () => {
-  const inFile = path.join(__dirname,'input','1440x900_yuv420p_h264_10fps.mp4')
-  const outFile = path.join(__dirname,'output','1440x900_yuv420p_h264_10fps_1s.mp4')
-  fs.mkdir(path.dirname(outFile), (err) => {})
+const testAvfTrim = async (input, start, end, checkMd5 = true) => {
+  output = path.join(
+    jestOutputDir,
+    `${start}s-${end}s-${path.basename(input)}`
+  );
 
-  await avf.trim(inFile, outFile, 0, 1)
+  await avf.trim(input, output, start, end);
 
-  let md5Sum = await getChecksumWithoutMeta(outFile)
-    .then()
-    .catch(console.log);
+  if (fs.existsSync(output)) {
+    let md5Sum = await getChecksumWithoutMeta(output).then().catch(console.log);
 
-  return md5Sum 
+    return md5Sum;
+  } else {
+    return null;
+  }
 };
 
-const captureSnapShot = async () => {
-  const inFile = path.join(__dirname, 'input', '1440x900_yuv420p_h264_10fps.mp4')
-  const outFile = path.join(__dirname, 'output', 'image.png')
-  fs.mkdir(path.dirname(outFile), (err) => { })
-
-  await avf.snapshot(inFile, outFile, 1)
-  let md5Sum = await getChecksumWithoutMeta(outFile)
-    .then()
-    .catch(console.log);
-  
-  return md5Sum
-};
-
-// NOTE: we skip the fist 512 bytes when calculating the md5 because those  
-// bytes contain metadata including the date, which changes every time you run
-// the trim function. The rest of the file is completely static, and the 
-// known-good hash was calculated with the same method, making a match during 
-// testing possible
-function getChecksumWithoutMeta(path) {
-  return new Promise(function (resolve, reject) {
-    const hash = crypto.createHash('md5');
-    const input = fs.createReadStream(path, { highWaterMark: 512 });
-
-    let i = 0;
-    input.on('error', reject);
-    input.on('data', function (chunk) {
-      i++;
-      // this is where we skip the first 512 bytes
-      if (i>1){
-        hash.update(chunk);
-      } 
-    });
-
-    input.on('close', function () {
-      resolve(hash.digest('hex'));
-    });
-  });
-}
-
-// Test Bodies. We are currently testing trimming a known video to the
-// first 1 second, then comparing it to an md5 hash of a known-good result
-test('trim to one second, check output against known good result', async () => {
-  const outputMd5 = await avfTrimFirstSecond()
-  expect(outputMd5).toBe("482976f166cb6c4777ca893194124db8");
+// Video comparison is done with md5 hashes. The md5 hashes must skip
+// the first 512 bytes of the output, since that changes due to metadata
+test("trim first second of replayable sample", async () => {
+  const outputMd5 = await testAvfTrim(jestInputFiles.replayableSample, 0, 1);
+  expect(outputMd5).toBe("55af708dee20cfaea73e5c02a8a6bae1");
 });
 
-test('capture snapshot at 1 second, check output against known good result', async () => {
-  const outputMd5 = await captureSnapShot()
-  expect(outputMd5).toBe("5ddbd7826a1cf84e07764c3629bd5b10");
+test("trim first second of frame perfect timer example", async () => {
+  const outputMd5 = await testAvfTrim(jestInputFiles.timer, 0, 1);
+  expect(outputMd5).toBe("98a478257224e8765de42a5478328778");
+  // human check: the video is counter from 0.0 to 0.9
 });
+
+test("trim first second of frame perfect counter example", async () => {
+  const outputMd5 = await testAvfTrim(jestInputFiles.frameCounter, 0, 1);
+  expect(outputMd5).toBe("dd4b886ec94ea5adb38aae84382df11c");
+  // human check: the video is counter from 1 to 10
+});
+
+// //////
+// // Failure conditions. The bindings should fail gracefully
+// //
+// // These tests are currently disabled because graceful exit is out-of-spec. Enable later
+// //////
+// test('ask for out-of-bounds input time', async () => {
+//   const err = await testAvfTrim(jestInputFiles.replayableSample, -1, 1, checkMd5=false)
+//   expect(err).toBe(null);
+// });

@@ -8,6 +8,11 @@
     "prepublish": "npm run build",
     "test": "jest"
   },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/jest-tests/utils.js"
+    ]
+  },
   "files": [
     "avf",
     "index.js"
