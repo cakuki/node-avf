@@ -11,6 +11,9 @@ func run(args: [String]) throws {
         let trimEnd = Double(args[4])
 
         try trim(sourceURL: sourceURL, destinationURL: destinationURL, trimStart: trimStart!, trimEnd: trimEnd!)
+    case "snapshot":
+        let seconds = Double(args[3])
+        try captureSnapShot(sourceURL: sourceURL, destinationURL: destinationURL, seconds: seconds!)
     case "help":
         showUsage(exitCode: 0)
     default:
@@ -22,6 +25,16 @@ func trim(sourceURL: URL, destinationURL: URL, trimStart: Double, trimEnd: Doubl
     let asset = AVURLAsset(url: sourceURL)
     let trimmedAsset = try asset.assetByTrimming(timeStart: trimStart, timeEnd: trimEnd)
     try trimmedAsset.export(to: destinationURL)
+}
+
+func captureSnapShot(sourceURL: URL, destinationURL: URL, seconds: Double) throws {
+    let asset = AVURLAsset(url: sourceURL)
+    let img = try asset.getCGImage(seconds: seconds)
+    if #available(macOS 11, *) {
+        try img.save(destination: destinationURL)
+    } else {
+        print("OS not supported: ", img)
+    }
 }
 
 func showUsage(exitCode: Int32 = 0) {

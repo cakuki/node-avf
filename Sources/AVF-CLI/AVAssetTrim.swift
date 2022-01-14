@@ -27,6 +27,20 @@ extension FileManager {
     }
 }
 
+@available(macOS 11, *)
+extension CGImage {
+    func save(destination: URL) throws {
+        guard let cgDestination = CGImageDestinationCreateWithURL(destination as CFURL, UTType.png.identifier as CFString, 1, nil) else { throw TrimError("Could not create destination.") }
+        CGImageDestinationAddImage(cgDestination, self, nil)
+        let saved = CGImageDestinationFinalize(cgDestination)
+        if !saved {
+            throw TrimError("Could not save image.")
+        } else {
+            print("Image saved")
+        }
+    }
+}
+
 extension AVAsset {
     /// This function will generate image from a video at provided seconds.
     /// - Parameters:
@@ -48,6 +62,11 @@ extension AVAsset {
                 }
             }
         }
+    }
+
+    func getCGImage(seconds: Double) throws -> CGImage {
+        let imageGenerator = AVAssetImageGenerator(asset: self)
+        return try imageGenerator.copyCGImage(at: CMTimeMake(value: Int64(seconds), timescale: 60), actualTime: nil)
     }
 
     func assetByTrimming(timeOffStart: Double) throws -> AVAsset {

@@ -6,6 +6,11 @@ const electronUtil = require('electron-util/node')
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'avf')
 
 module.exports.trim = async(input, output, timeStart, timeEnd) => {
-  const {stdout} = await execa(BIN, ['trim', input, output, timeStart, timeEnd])
-	console.log(stdout)
+  const { stdout } = await execa(BIN, ['trim', input, output, timeStart, timeEnd])
+	console.log('Printing outpult', stdout)
+}
+
+module.exports.snapshot = async (input, output, seconds) => {
+  const { stdout } = await execa(BIN, ['snapshot', input, output, seconds])
+  console.log('Printing outpult', stdout)
 }
