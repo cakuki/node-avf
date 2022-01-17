@@ -12,27 +12,25 @@ const testSnapshot = async (input, time) => {
   await avf.snapshot(input, output, time);
 
   if (fs.existsSync(output)) {
-    let md5Sum = await getChecksum(output).then().catch(console.log);
-
-    return md5Sum;
+    return getChecksum(output).then().catch(console.log);
   } else {
     return null;
   }
 };
 
-test("test capture snapshot from replayable sample at 1 second", async () => {
+test("test capture snapshot from replayable sample at 400 ms", async () => {
   const outputMd5 = await testSnapshot(jestInputFiles.replayableSample, 400);
   expect(outputMd5).toBe("NO KNOWN GOOD HASH");
 });
 
-test("test capture snapshot from timer at 1 second", async () => {
-  const outputMd5 = await testSnapshot(jestInputFiles.timer, 1);
+test("test capture snapshot from timer at 1000 ms", async () => {
+  const outputMd5 = await testSnapshot(jestInputFiles.timer, 1000);
   expect(outputMd5).toBe("NO KNOWN GOOD HASH");
   // human test: .png should be a picture of "0.9" (currently does not)
 });
 
-test("test capture snapshot from frame counter at 1 second", async () => {
-  const outputMd5 = await testSnapshot(jestInputFiles.frameCounter, 1);
+test("test capture snapshot from frame counter at 2000 ms", async () => {
+  const outputMd5 = await testSnapshot(jestInputFiles.frameCounter, 2000);
   expect(outputMd5).toBe("NO KNOWN GOOD HASH");
   // human test: .png should be a picture of "10" (currently does not)
 });

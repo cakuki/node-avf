@@ -16,7 +16,7 @@ module.exports.trim = async (input, output, timeStart, timeEnd) => {
   console.log("execa avf.trim output: ", stdout);
 };
 
-module.exports.snapshot = async (input, output, seconds) => {
-  const { stdout } = await execa(BIN, ["snapshot", input, output, seconds]);
+module.exports.snapshot = async (input, output, milliSeconds) => {
+  const { stdout } = await execa(BIN, ["snapshot", input, output, milliSeconds]);
   console.log("execa avf.snapshot output: ", stdout);
 };

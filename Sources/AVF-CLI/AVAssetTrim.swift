@@ -47,20 +47,35 @@ extension AVAsset {
     ///   - seconds: Seconds where image should be generated in Integer formate.
     ///   - onSuccess: This callback will be called when image is generated successfully.
     /// - Returns: Nothing
-    func captureVideoSnapshot(_ seconds: Int64, onSuccess: @escaping ((_ image: CGImage)->Void)) {
+    func captureVideoSnapshot(milliSeconds: Double) throws -> CGImage {
         let imageGenerator = AVAssetImageGenerator(asset: self)
-        let time = NSValue(time: CMTimeMake(value: seconds, timescale: 60))
+        imageGenerator.requestedTimeToleranceAfter = CMTime.zero
+        imageGenerator.requestedTimeToleranceBefore = CMTime.zero
         imageGenerator.appliesPreferredTrackTransform = true
+        let time = NSValue(time: CMTimeMake(value: Int64(milliSeconds), timescale: 1000))
+        var finalImage: CGImage?
+        var finalError: Error?
+        let group = DispatchGroup()
+        group.enter()
         DispatchQueue.global(qos: .background).async {
             imageGenerator.generateCGImagesAsynchronously(forTimes: [time]) { _, image, _, _, error in
                 if let err = error {
+                    finalError = err
+                    group.leave()
                     print("Error in generating image: ", err.localizedDescription)
                     return
                 }
                 if let img = image {
-                    onSuccess(img)
+                    finalImage = img
+                    group.leave()
                 }
             }
+        }
+        group.wait()
+        if let err = finalError {
+            throw err
+        } else {
+            return finalImage!
         }
     }
 
