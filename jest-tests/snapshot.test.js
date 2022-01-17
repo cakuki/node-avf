@@ -18,21 +18,22 @@ const testSnapshot = async (input, time) => {
   }
 };
 
-test("test capture snapshot from replayable sample at 400 ms", async () => {
-  const outputMd5 = await testSnapshot(jestInputFiles.replayableSample, 400);
-  expect(outputMd5).toBe("NO KNOWN GOOD HASH");
+test("test capture snapshot from replayable sample at 1 s", async () => {
+  const outputMd5 = await testSnapshot(jestInputFiles.replayableSample, 1);
+  expect(outputMd5).toBe("9629b5bc575afcff9c812706e88f3ad3");
+  // human test: .png should contain a timer value of "1s 31"
 });
 
-test("test capture snapshot from timer at 1000 ms", async () => {
-  const outputMd5 = await testSnapshot(jestInputFiles.timer, 1000);
-  expect(outputMd5).toBe("NO KNOWN GOOD HASH");
-  // human test: .png should be a picture of "0.9" (currently does not)
+test("test capture snapshot from timer at 1 s", async () => {
+  const outputMd5 = await testSnapshot(jestInputFiles.timer, 1);
+  expect(outputMd5).toBe("14c6d6461889c6ec344fac0c0b3fd996");
+  // human test: .png should be a picture of "1.0"
 });
 
-test("test capture snapshot from frame counter at 2000 ms", async () => {
-  const outputMd5 = await testSnapshot(jestInputFiles.frameCounter, 2000);
-  expect(outputMd5).toBe("NO KNOWN GOOD HASH");
-  // human test: .png should be a picture of "10" (currently does not)
+test("test capture snapshot from frame counter at 1.5 s", async () => {
+  const outputMd5 = await testSnapshot(jestInputFiles.frameCounter, 1.5);
+  expect(outputMd5).toBe("b1e802bd125fb116f68c45a7a0e079b5");
+  // human test: .png should be a picture of "16"
 });
 
 // //////

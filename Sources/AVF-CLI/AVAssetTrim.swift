@@ -79,11 +79,6 @@ extension AVAsset {
         }
     }
 
-    func getCGImage(seconds: Double) throws -> CGImage {
-        let imageGenerator = AVAssetImageGenerator(asset: self)
-        return try imageGenerator.copyCGImage(at: CMTimeMake(value: Int64(seconds), timescale: 60), actualTime: nil)
-    }
-
     func assetByTrimming(timeOffStart: Double) throws -> AVAsset {
         return try assetByTrimming(timeStart: 0, timeEnd: timeOffStart)
     }
