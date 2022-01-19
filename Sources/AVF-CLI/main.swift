@@ -15,7 +15,6 @@ func run(args: [String]) throws {
         let seconds = Double(args[3])
         try captureSnapShot(sourceURL: sourceURL, destinationURL: destinationURL, milliSeconds: seconds!)
     case "gif":
-        print("In Gif case")
         try createGIF(sourceURL: sourceURL, destinationURL: destinationURL)
     case "help":
         showUsage(exitCode: 0)
@@ -42,11 +41,9 @@ func captureSnapShot(sourceURL: URL, destinationURL: URL, milliSeconds: Double) 
 
 func createGIF(sourceURL: URL, destinationURL: URL) throws {
     let asset = AVURLAsset(url: sourceURL)
-    print("Creating GIF")
     if #available(macOS 11, *) {
         let tempURL = try asset.createGIF()
         try moveFile(sourceURL: tempURL, destination: destinationURL)
-        print("URL of gif: ", destinationURL)
     } else {
         print("OS not supported")
     }

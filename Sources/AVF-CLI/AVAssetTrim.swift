@@ -89,10 +89,7 @@ func createGIF() throws -> URL {
         let destination = CGImageDestinationCreateWithURL(resultingFileURL as CFURL, UTType.gif.identifier as CFString, totalFrames, nil)!
         CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
         
-        print("Converting to GIF…")
-        var framesProcessed = 0
-        let startTime = CFAbsoluteTimeGetCurrent()
-        
+        var framesProcessed = 0        
         var finalError: Error?
         
         let group = DispatchGroup()
@@ -115,16 +112,10 @@ func createGIF() throws -> URL {
                 CGImageDestinationAddImage(destination, resultingImage, frameProperties as CFDictionary)
                 
                 if framesProcessed == totalFrames {
-                    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-                    print("Done converting to GIF! Frames processed: \(framesProcessed) • Total time: \(timeElapsed) s.")
-                    
                     // Save to Photos just to check…
                     let result = CGImageDestinationFinalize(destination)
-                    print("Did it succeed?", result)
                     
-                    if result {
-                        print("Gift created successfully…")
-                    } else {
+                    if !result {
                         finalError = GifErrors.finaliseDestination
                     }
                     group.leave()
