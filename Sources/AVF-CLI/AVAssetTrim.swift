@@ -2,6 +2,7 @@
 
 import AVFoundation
 import Foundation
+import Photos
 
 struct TrimError: Error {
     let description: String
@@ -42,6 +43,101 @@ extension CGImage {
 }
 
 extension AVAsset {
+    enum GifErrors: Error {
+        case imageNotFound
+        case finaliseDestination
+    }
+/// This method will create gif from avasset
+@available(macOS 11, *)
+func createGIF() throws -> URL {        
+        let frameRate: Int = 10
+        let duration: TimeInterval = 5
+        let totalFrames = Int(duration * TimeInterval(frameRate))
+        let delayBetweenFrames: TimeInterval = 1.0 / TimeInterval(frameRate)
+        
+        var timeValues: [NSValue] = []
+        
+        
+        for frameNumber in 0 ..< totalFrames {
+            let seconds = TimeInterval(delayBetweenFrames) * TimeInterval(frameNumber)
+            let time = CMTime(seconds: seconds, preferredTimescale: Int32(NSEC_PER_SEC))
+            timeValues.append(NSValue(time: time))
+        }
+        
+        let generator = AVAssetImageGenerator(asset: self)
+        generator.requestedTimeToleranceBefore = CMTime(seconds: 0.05, preferredTimescale: 600)
+        generator.requestedTimeToleranceAfter = CMTime(seconds: 0.05, preferredTimescale: 600)
+        
+        let sizeModifier: CGFloat = 0.1
+        generator.maximumSize = CGSize(width: 450.0 * sizeModifier, height: 563.0 * sizeModifier)
+        
+        // Set up resulting image
+        let fileProperties: [String: Any] = [
+            kCGImagePropertyGIFDictionary as String: [
+                kCGImagePropertyGIFLoopCount as String: 0
+            ]
+        ]
+        
+        let frameProperties: [String: Any] = [
+            kCGImagePropertyGIFDictionary as String: [
+                kCGImagePropertyGIFDelayTime: delayBetweenFrames
+            ]
+        ]
+
+        let resultingFilename = String(format: "%@_%@", ProcessInfo.processInfo.globallyUniqueString, "html5gif.gif")
+        let resultingFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(resultingFilename)
+        let destination = CGImageDestinationCreateWithURL(resultingFileURL as CFURL, UTType.gif.identifier as CFString, totalFrames, nil)!
+        CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
+        
+        print("Converting to GIF…")
+        var framesProcessed = 0
+        let startTime = CFAbsoluteTimeGetCurrent()
+        
+        var finalError: Error?
+        
+        let group = DispatchGroup()
+        group.enter()
+        DispatchQueue.global(qos: .background).async {
+            generator.generateCGImagesAsynchronously(forTimes: timeValues) { (requestedTime, resultingImage, actualTime, result, error) in
+                if let err = error {
+                    finalError = err
+                    group.leave()
+                    return
+                }
+                guard let resultingImage = resultingImage else {
+                    finalError = GifErrors.imageNotFound
+                    group.leave()
+                    return
+                }
+                
+                framesProcessed += 1
+                
+                CGImageDestinationAddImage(destination, resultingImage, frameProperties as CFDictionary)
+                
+                if framesProcessed == totalFrames {
+                    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+                    print("Done converting to GIF! Frames processed: \(framesProcessed) • Total time: \(timeElapsed) s.")
+                    
+                    // Save to Photos just to check…
+                    let result = CGImageDestinationFinalize(destination)
+                    print("Did it succeed?", result)
+                    
+                    if result {
+                        print("Gift created successfully…")
+                    } else {
+                        finalError = GifErrors.finaliseDestination
+                    }
+                    group.leave()
+                }
+            }
+        }
+        group.wait()
+        if let err = finalError {
+            throw err
+        } else {
+            return resultingFileURL
+        }
+    }
     /// This function will generate image from a video at provided seconds.
     /// - Parameters:
     ///   - seconds: Seconds where image should be generated in Integer formate.

@@ -20,3 +20,8 @@ module.exports.snapshot = async (input, output, seconds) => {
   const { stdout } = await execa(BIN, ["snapshot", input, output, seconds*1000]);
   console.log("execa avf.snapshot output: ", stdout);
 };
+
+module.exports.gif = async (input, output) => {
+  const { stdout } = await execa(BIN, ["gif", input, output]);
+  console.log("execa avf.gif output: ", stdout);
+};
