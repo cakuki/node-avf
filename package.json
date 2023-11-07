@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "description": "A node.js wrapper for common AVFoundation operations.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "swift build --configuration=release --static-swift-stdlib -Xswiftc '-target' -Xswiftc 'x86_64-apple-macosx10.12' && mv .build/release/avf .",
-    "prepublish": "npm run build"
+    "build": "swift build --configuration=release && mv .build/release/avf .",
+    "prepublish": "npm run build",
+    "test": "node test"
   },
   "files": [
     "avf",
