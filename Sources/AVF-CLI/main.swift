@@ -2,11 +2,12 @@ import AVFoundation
 import Foundation
 
 func run(args: [String]) throws {
-    let sourceURL = URL(fileURLWithPath: args[1])
-    let destinationURL = URL(fileURLWithPath: args[2])
+    let command = args[safe: 0]
 
-    switch args.first {
+    switch command {
     case "trim":
+        let sourceURL = URL(fileURLWithPath: args[1])
+        let destinationURL = URL(fileURLWithPath: args[2])
         let trimStart = Double(args[3])
         let trimEnd = Double(args[4])
 
